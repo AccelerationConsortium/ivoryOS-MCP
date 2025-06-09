@@ -2,7 +2,6 @@
 from mcp.server.fastmcp import FastMCP
 import httpx
 
-
 # Create an MCP server
 mcp = FastMCP("IvoryOS MCP")
 
@@ -16,7 +15,6 @@ client = httpx.Client(follow_redirects=True)
 
 
 def _check_authentication():
-    global client
     try:
         resp = client.get(f"{url}/", follow_redirects=False)
         if resp.status_code == httpx.codes.OK:
@@ -83,7 +81,6 @@ def generate_custom_script() -> str:
         return "there is not deck available."
 
 
-
 @mcp.tool("pause_and_resume")
 def pause_and_resume() -> str:
     """toggle pause and resume for workflow execution"""
@@ -93,7 +90,6 @@ def pause_and_resume() -> str:
     return msg
 
 
-
 @mcp.tool("abort_pending_workflow_iterations")
 def abort_pending_workflow_iterations() -> str:
     """abort pending workflow execution"""
@@ -101,6 +97,7 @@ def abort_pending_workflow_iterations() -> str:
         return f"Having issues logging in to ivoryOS, or ivoryOS server is not running."
     msg = client.post(f"{url}/api/abort_pending").json()
     return msg
+
 
 @mcp.tool("stop_current_workflow")
 def stop_workflow() -> str:
@@ -129,14 +126,14 @@ def run_workflow_with_kwargs(kwargs_list: list[dict] = None) -> str | int:
     kwargs_to_ivoryos_format = {}
     for index, kwargs in enumerate(kwargs_list):
         for key, value in kwargs.items():
-            kwargs_to_ivoryos_format[f"{key}[{index+1}]"] = value
+            kwargs_to_ivoryos_format[f"{key}[{index + 1}]"] = value
     kwargs_to_ivoryos_format["online-config"] = ""
     response = client.post(f"{url}/experiment", data=kwargs_to_ivoryos_format)
     return response.status_code
 
 
 @mcp.tool("load_workflow_script")
-def load_workflow_script(workflow_name:str) -> str:
+def load_workflow_script(workflow_name: str) -> str:
     """get current workflow script"""
     if not _check_authentication():
         return "Having issues logging in to ivoryOS, or ivoryOS server is not running."
@@ -146,6 +143,7 @@ def load_workflow_script(workflow_name:str) -> str:
         return script
     return "cannot get workflow script"
 
+
 @mcp.tool("submit_workflow_script")
 def submit_workflow_script(main_script: str = "", cleanup_script: str = "", prep_script: str = "") -> str:
     """get current workflow script"""
@@ -154,6 +152,7 @@ def submit_workflow_script(main_script: str = "", cleanup_script: str = "", prep
     client.post(f"{url}/api/get_script", data={"script": main_script, "cleanup": cleanup_script, "prep": prep_script})
     return "Updated"
 
+
 @mcp.tool("get_workflow_execution_status")
 def get_workflow_execution_status():
     """get workflow status"""
@@ -161,6 +160,7 @@ def get_workflow_execution_status():
         return "Having issues logging in to ivoryOS, or ivoryOS server is not running."
     msg = client.get(f"{url}/api/status").json()
     return msg
+
 
 if __name__ == "__main__":
     print("Running...")
