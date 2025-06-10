@@ -36,6 +36,30 @@ def summarize_deck_function() -> str:
         return "there is not deck available."
 
 
+@mcp.tool("execute-task")
+async def execute_task(component: str, method: str, kwargs: dict = None) -> str:
+    """Execute a robot task and return task_id or output."""
+    if kwargs is None:
+        kwargs = {}
+
+    snapshot = client.get(f"{url}/backend_control").json()
+    if component not in snapshot:
+        return f"The component {component} does not exist in {snapshot}."
+
+    kwargs["hidden_name"] = method
+    kwargs["hidden_wait"] = False
+    resp = client.post(f"{url}/backend_control/{component}", data=kwargs)
+    if resp.status_code == httpx.codes.OK:
+        result = resp.json()
+        return f"{result}. Use `execution-status` to monitor."
+    else:
+        return "there is not deck available."
+
+
+
+
+
+
 # Add a dynamic greeting resource
 @mcp.resource("functions://{component}")
 def get_component_functions(component: str) -> str:
@@ -49,7 +73,7 @@ def get_component_functions(component: str) -> str:
         return "there is not deck available."
 
 
-@mcp.prompt()
+@mcp.prompt("generate-workflow-script")
 def generate_custom_script() -> str:
     """summarize the current deck functions"""
     try:
@@ -132,7 +156,7 @@ def run_workflow_with_kwargs(kwargs_list: list[dict] = None) -> str | int:
     return response.status_code
 
 
-@mcp.tool("load_workflow_script")
+@mcp.resource("load_workflow_script://<workflow_name>")
 def load_workflow_script(workflow_name: str) -> str:
     """get current workflow script"""
     if not _check_authentication():
@@ -153,13 +177,16 @@ def submit_workflow_script(main_script: str = "", cleanup_script: str = "", prep
     return "Updated"
 
 
-@mcp.tool("get_workflow_execution_status")
-def get_workflow_execution_status():
+@mcp.tool("execution-status")
+def execution_status():
     """get workflow status"""
     if not _check_authentication():
         return "Having issues logging in to ivoryOS, or ivoryOS server is not running."
-    msg = client.get(f"{url}/api/status").json()
-    return msg
+    resp = client.get(f"{url}/api/status")
+    if resp.status_code == httpx.codes.OK:
+        return resp.json()
+    else:
+        return "cannot get workflow status"
 
 
 if __name__ == "__main__":
