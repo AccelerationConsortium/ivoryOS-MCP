@@ -3,9 +3,39 @@
 ![](https://badge.mcpx.dev?type=server 'MCP Server')
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Serve as a robot control interface using Model Context Protocol (MCP) to design, manage workflows, and interact with the current hardware/software execution layer.
+Serve as a robot control interface using [IvoryOS](https://gitlab.com/heingroup/ivoryos) and Model Context Protocol (MCP) to design, manage workflows, and interact with the current hardware/software execution layer.
 
-## Features
+
+## 📦 Installation
+Install [uv](https://docs.astral.sh/uv/).
+### 1. Clone the Repository
+
+```bash
+git clone https://gitlab.com/heingroup/ivoryos-mpc
+cd ivoryos-mcp
+```
+### 2. Install dependencies
+When using IDE (e.g. PyCharm), the `uv` environment might be configured, you can skip this section.
+```bash
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+uv pip install -r uv.lock
+```
+## ⚙️ Configuration
+In `ivoryos_mcp/server.py`, change ivoryOS url and login credentials. 
+```python
+url = "http://127.0.0.1:8000/ivoryos"
+login_data = {
+    "username": "admin",
+    "password": "admin"
+}
+```
+## 🚀 Install the server (in [Claude Desktop](https://claude.ai/download))
+```bash
+mcp install ivoryos_mcp/server.py
+```
+
+## ✨ Features
 | **Category**         | **Feature**                         | **Description**                                      | **Status** |
 |----------------------|-------------------------------------|------------------------------------------------------|------------|
 | **General Tools**    | `platform-info`                     | Get signature of the current platform                | ✅          |
@@ -21,3 +51,4 @@ Serve as a robot control interface using Model Context Protocol (MCP) to design,
 | **Workflow Data**    | `list-workflow-data`                | List available workflow execution data               | ✅          |
 |                      | `load-workflow-data`                | Load CSV and execution log from selected workflow    | ✅          |
 
+## 🧪 Examples
