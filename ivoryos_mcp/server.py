@@ -26,9 +26,11 @@ def _check_authentication():
         return False
 
 
-@mcp.tool("deck-info")
+@mcp.tool("platform-info")
 def summarize_deck_function() -> str:
-    """summarize the current deck functions"""
+    """
+    summarize the current deck functions
+    """
     try:
         snapshot = client.get(f"{url}/backend_control").json()
         return f"summarize the python function representation {snapshot}"
@@ -36,9 +38,33 @@ def summarize_deck_function() -> str:
         return "there is not deck available."
 
 
+@mcp.tool("execution-status")
+def execution_status():
+    """
+    get workflow status
+    :return:
+    if not busy:   {'busy': False, 'last_task': {}}
+    if busy:       {'busy': True, 'current_task': {'end_time': None, 'id': 7, 'kwargs': {'amount_in_mg': '5', 'bring_in': 'false'}, 'method_name': 'AbstractSDL.dose_solid', 'output': None, 'run_error': '0', 'start_time': 'Tue, 10 Jun 2025 13:41:27 GMT'}}
+    """
+    if not _check_authentication():
+        return "Having issues logging in to ivoryOS, or ivoryOS server is not running."
+    resp = client.get(f"{url}/api/status")
+    if resp.status_code == httpx.codes.OK:
+        return resp.json()
+    else:
+        return "cannot get workflow status"
+
+
 @mcp.tool("execute-task")
 async def execute_task(component: str, method: str, kwargs: dict = None) -> str:
-    """Execute a robot task and return task_id or output."""
+    """
+    Execute a robot task and return task_id.
+
+    :param component: deck component (e.g. sdl)
+    :param method: method name (e.g. dose_solid)
+    :param kwargs: method keyword arguments (e.g. {'amount_in_mg': '5'})
+    :return: {'status': 'task started', 'task_id': 7}
+    """
     if kwargs is None:
         kwargs = {}
 
@@ -47,30 +73,48 @@ async def execute_task(component: str, method: str, kwargs: dict = None) -> str:
         return f"The component {component} does not exist in {snapshot}."
 
     kwargs["hidden_name"] = method
+    # only submit the task without waiting for completion.
     kwargs["hidden_wait"] = False
-    resp = client.post(f"{url}/backend_control/{component}", data=kwargs)
+    resp = client.post(f"{url}/backend_control/deck.{component}", data=kwargs)
     if resp.status_code == httpx.codes.OK:
         result = resp.json()
         return f"{result}. Use `execution-status` to monitor."
     else:
         return "there is not deck available."
 
+@mcp.tool("list-workflow-scripts")
+def list_workflow_script(search_key:str='', deck_name:str='') -> str:
+    """get current workflow script"""
+    if not _check_authentication():
+        return "Having issues logging in to ivoryOS, or ivoryOS server is not running."
+    resp = client.get(f"{url}/database/{deck_name}", params={"keyword": search_key})
+    if resp.status_code == httpx.codes.OK:
+        return resp.json()
+    return "cannot get workflow script"
 
 
+@mcp.tool("load-workflow-script")
+def load_workflow_script(workflow_name: str) -> str:
+    """get current workflow script"""
+    if not _check_authentication():
+        return "Having issues logging in to ivoryOS, or ivoryOS server is not running."
+    resp = client.get(f"{url}/edit_workflow/{workflow_name}")
+    if resp.status_code == httpx.codes.OK:
+        script = client.get(f"{url}/api/get_script").json()
+        return script
+    return "cannot get workflow script"
 
-
-
-# Add a dynamic greeting resource
-@mcp.resource("functions://{component}")
-def get_component_functions(component: str) -> str:
-    """Get a personalized greeting"""
-    try:
-        snapshot = client.get(f"{url}/backend_control").json()
-        if component in snapshot.keys():
-            return f"the function signature is {snapshot[component]}"
-        return f"This component is not available on current deck, please use {snapshot.keys()}"
-    except Exception:
-        return "there is not deck available."
+# # Add a dynamic greeting resource
+# @mcp.resource("functions://{component}")
+# def get_component_functions(component: str) -> str:
+#     """Get a personalized greeting"""
+#     try:
+#         snapshot = client.get(f"{url}/backend_control").json()
+#         if component in snapshot.keys():
+#             return f"the function signature is {snapshot[component]}"
+#         return f"This component is not available on current deck, please use {snapshot.keys()}"
+#     except Exception:
+#         return "there is not deck available."
 
 
 @mcp.prompt("generate-workflow-script")
@@ -104,8 +148,9 @@ def generate_custom_script() -> str:
     except Exception:
         return "there is not deck available."
 
+# --- workflow control tools ---
 
-@mcp.tool("pause_and_resume")
+@mcp.tool("pause-and-resume")
 def pause_and_resume() -> str:
     """toggle pause and resume for workflow execution"""
     if not _check_authentication():
@@ -114,7 +159,7 @@ def pause_and_resume() -> str:
     return msg
 
 
-@mcp.tool("abort_pending_workflow_iterations")
+@mcp.tool("abort-pending-workflow-iterations")
 def abort_pending_workflow_iterations() -> str:
     """abort pending workflow execution"""
     if not _check_authentication():
@@ -123,7 +168,7 @@ def abort_pending_workflow_iterations() -> str:
     return msg
 
 
-@mcp.tool("stop_current_workflow")
+@mcp.tool("stop-current-workflow")
 def stop_workflow() -> str:
     """stop workflow execution after current step"""
     if not _check_authentication():
@@ -132,7 +177,7 @@ def stop_workflow() -> str:
     return msg
 
 
-@mcp.tool("repeat_run_workflow")
+@mcp.tool("repeat-run-workflow")
 def repeat_run_workflow(repeat_time: int = None) -> str:
     """stop workflow execution after current step"""
     if not _check_authentication():
@@ -141,7 +186,7 @@ def repeat_run_workflow(repeat_time: int = None) -> str:
     return "workflow execution started."
 
 
-@mcp.tool("run_workflow_with_parameters")
+@mcp.tool("run-workflow-with-parameters")
 def run_workflow_with_kwargs(kwargs_list: list[dict] = None) -> str | int:
     """stop workflow execution after current step"""
     if not _check_authentication():
@@ -156,17 +201,6 @@ def run_workflow_with_kwargs(kwargs_list: list[dict] = None) -> str | int:
     return response.status_code
 
 
-@mcp.resource("load_workflow_script://<workflow_name>")
-def load_workflow_script(workflow_name: str) -> str:
-    """get current workflow script"""
-    if not _check_authentication():
-        return "Having issues logging in to ivoryOS, or ivoryOS server is not running."
-    resp = client.get(f"{url}/edit_workflow/{workflow_name}")
-    if resp.status_code == httpx.codes.OK:
-        script = client.get(f"{url}/api/get_script").json()
-        return script
-    return "cannot get workflow script"
-
 
 @mcp.tool("submit_workflow_script")
 def submit_workflow_script(main_script: str = "", cleanup_script: str = "", prep_script: str = "") -> str:
@@ -177,16 +211,34 @@ def submit_workflow_script(main_script: str = "", cleanup_script: str = "", prep
     return "Updated"
 
 
-@mcp.tool("execution-status")
-def execution_status():
-    """get workflow status"""
+@mcp.tool("list-workflow-data")
+def list_workflow_data(workflow_name: str = "") -> str:
+    """
+    list workflow data
+    :param workflow_name: load data that was acquired using `workflow name`
+    :return: {'workflow_data': {'1': {'start_time': 'Mon, 09 Jun 2025 16:01:03 GMT', 'workflow_name': 'test1'}}}
+    """
     if not _check_authentication():
         return "Having issues logging in to ivoryOS, or ivoryOS server is not running."
-    resp = client.get(f"{url}/api/status")
+    resp = client.get(f"{url}/workflow_runs", params={"keyword": workflow_name})
     if resp.status_code == httpx.codes.OK:
         return resp.json()
-    else:
-        return "cannot get workflow status"
+    return "cannot get workflow data"
+
+
+@mcp.tool("load-workflow-data")
+def load_workflow_data(workflow_id: int) -> str:
+    """
+    list workflow data
+    :param workflow_name: load data that was acquired using `workflow name`
+    :return: {'workflow_data': {'1': {'start_time': 'Mon, 09 Jun 2025 16:01:03 GMT', 'workflow_name': 'test1'}}}
+    """
+    if not _check_authentication():
+        return "Having issues logging in to ivoryOS, or ivoryOS server is not running."
+    resp = client.get(f"{url}/workflow_steps/{workflow_id}")
+    if resp.status_code == httpx.codes.OK:
+        return resp.json()
+    return "cannot get workflow data"
 
 
 if __name__ == "__main__":

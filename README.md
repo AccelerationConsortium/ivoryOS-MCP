@@ -3,29 +3,21 @@
 ![](https://badge.mcpx.dev?type=server 'MCP Server')
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-### General tools
-*[x] `platform-info`: get the signature of the current platform.
-*[x] `execution-status` get if the system is busy and the current/last task status
+Serve as a robot control interface using Model Context Protocol (MCP) to design, manage workflows, and interact with the current hardware/software execution layer.
 
-### Direct control
-*[x] `execute-task` Backend function call
+## Features
+| **Category**         | **Feature**                         | **Description**                                      | **Status** |
+|----------------------|-------------------------------------|------------------------------------------------------|------------|
+| **General Tools**    | `platform-info`                     | Get signature of the current platform                | ✅          |
+|                      | `execution-status`                  | Check if system is busy and current/last task status | ✅          |
+| **Direct Control**   | `execute-task`                      | Call backend function directly                       | ✅          |
+| **Workflow Design**  | `list-workflow-scripts`             | List all workflow scripts from the database          | ✅          |
+|                      | `load-workflow-script`              | Load a workflow script from the database             | ✅          |
+|                      | `submit-workflow-script`            | Save a workflow Python script to the database        | ✅          |
+|                      | `create-execution-plan`             | Build an execution plan from prompt/visual/script    | ✅          |
+| **Workflow Control** | `pause-and-resume`                  | Pause or resume the workflow execution               | ✅          |
+|                      | `abort-pending-workflow-iterations` | Finish current iteration, abort future executions    | ✅          |
+|                      | `stop-current-workflow`             | Safe stop of current workflow                        | ✅          |
+| **Workflow Data**    | `list-workflow-data`                | List available workflow execution data               | ✅          |
+|                      | `load-workflow-data`                | Load CSV and execution log from selected workflow    | ✅          |
 
-### Workflow design
-Tools:
-*[x] `load-workflow-script`: get a workflow script by name from database
-*[ ] `submit-workflow-script`: save a workflow Python script to database
-*[ ] `create-execution-plan`: 
-
-Prompt:
-*[x] `generate-workflow-script`
-
-
-### Workflow control
-*[x] `pause-and-resume`
-*[x] `abort-pending-workflow-iterations`
-*[x] `stop-current-workflow`
-
-
-### Workflow data
-*[ ]  List available workflow data
-*[ ]  Load data csv and execution detail from selected workflow
