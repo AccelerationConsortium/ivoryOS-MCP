@@ -56,7 +56,7 @@ def execution_status():
 
 
 @mcp.tool("execute-task")
-async def execute_task(component: str, method: str, kwargs: dict = None) -> str:
+def execute_task(component: str, method: str, kwargs: dict = None) -> str:
     """
     Execute a robot task and return task_id.
 
@@ -69,13 +69,15 @@ async def execute_task(component: str, method: str, kwargs: dict = None) -> str:
         kwargs = {}
 
     snapshot = client.get(f"{url}/backend_control").json()
+    component = component if component.startswith("deck.") else f"deck.{component}"
+
     if component not in snapshot:
         return f"The component {component} does not exist in {snapshot}."
 
     kwargs["hidden_name"] = method
     # only submit the task without waiting for completion.
     kwargs["hidden_wait"] = False
-    resp = client.post(f"{url}/backend_control/deck.{component}", data=kwargs)
+    resp = client.post(f"{url}/backend_control/{component}", data=kwargs)
     if resp.status_code == httpx.codes.OK:
         result = resp.json()
         return f"{result}. Use `execution-status` to monitor."
@@ -207,8 +209,10 @@ def submit_workflow_script(main_script: str = "", cleanup_script: str = "", prep
     """get current workflow script"""
     if not _check_authentication():
         return "Having issues logging in to ivoryOS, or ivoryOS server is not running."
-    client.post(f"{url}/api/get_script", data={"script": main_script, "cleanup": cleanup_script, "prep": prep_script})
-    return "Updated"
+    response = client.post(f"{url}/api/get_script", json={"script": main_script, "cleanup": cleanup_script, "prep": prep_script})
+    if response.status_code == httpx.codes.OK:
+        return "Updated"
+    return "cannot update workflow script"
 
 
 @mcp.tool("list-workflow-data")
