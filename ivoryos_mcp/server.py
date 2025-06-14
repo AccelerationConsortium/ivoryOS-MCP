@@ -1,4 +1,6 @@
 # server.py
+from typing import Optional
+
 from mcp.server.fastmcp import FastMCP
 import httpx
 
@@ -33,7 +35,22 @@ def summarize_deck_function() -> str:
     """
     try:
         snapshot = client.get(f"{url}/backend_control").json()
-        return f"summarize the python function representation {snapshot}"
+        return (
+            """
+            IvoryOS is a unified task and workflow orchestrator.
+            workflow execution has 3 blocks, prep, main (iterate) and cleanup.
+            one can execute the workflow using 3 options
+            1. simple repeat with `run-workflow-repeat`
+            2. repeat with kwargs `run-workflow-kwargs`
+            3. campaign `run-workflow-campaign`
+            IvoryOS is a unified task and workflow orchestrator.
+            workflow execution has 3 blocks, prep, main (iterate) and cleanup.
+            one can execute the workflow using 3 options
+            1. simple repeat with `run-workflow-repeat`
+            2. repeat with kwargs `run-workflow-kwargs`
+            3. campaign `run-workflow-campaign`, use `ax_campaign_design` to for campaign design
+            """
+            f"you can summarize the available python function representation {snapshot}")
     except Exception:
         return "there is not deck available."
 
@@ -106,17 +123,16 @@ def load_workflow_script(workflow_name: str) -> str:
         return script
     return "cannot get workflow script"
 
-# # Add a dynamic greeting resource
-# @mcp.resource("functions://{component}")
-# def get_component_functions(component: str) -> str:
-#     """Get a personalized greeting"""
-#     try:
-#         snapshot = client.get(f"{url}/backend_control").json()
-#         if component in snapshot.keys():
-#             return f"the function signature is {snapshot[component]}"
-#         return f"This component is not available on current deck, please use {snapshot.keys()}"
-#     except Exception:
-#         return "there is not deck available."
+
+@mcp.tool("submit-workflow-script")
+def submit_workflow_script(workflow_name: str, main_script: str = "", cleanup_script: str = "", prep_script: str = "") -> str:
+    """get current workflow script"""
+    if not _check_authentication():
+        return "Having issues logging in to ivoryOS, or ivoryOS server is not running."
+    response = client.post(f"{url}/api/get_script", json={"workflow_name":workflow_name, "script": main_script, "cleanup": cleanup_script, "prep": prep_script})
+    if response.status_code == httpx.codes.OK:
+        return "Updated"
+    return "cannot update workflow script"
 
 
 @mcp.prompt("generate-workflow-script")
@@ -150,8 +166,39 @@ def generate_custom_script() -> str:
     except Exception:
         return "there is not deck available."
 
-# --- workflow control tools ---
 
+@mcp.prompt("campaign-design")
+def ax_campaign_design() -> str:
+    """summarize the current deck functions"""
+    return """
+    these are examples code of creating parameters, objectives and constraints
+    parameters=[
+        {"name": "x1", "type": "range", "value": 10.0},
+        {"name": "x2", "type": "fixed", "bounds": [0.0, 10.0]},
+        {
+            "name": "c1",
+            "type": "choice",
+            "is_ordered": False,
+            "values": ["A", "B", "C"],
+        },
+    ]
+    objectives=[
+        {"name": "obj_1", "minimize": True},
+        {"name": "obj_2", "minimize": False},
+    ]
+    parameter_constraints=[
+        "x1 + x2 <= 15.0",  # example of a sum constraint, which may be redundant/unintended if composition_constraint is also selected
+        "x1 + x2 <= {total}",  # reparameterized compositional constraint, which is a type of sum constraint
+        "x1 <= x2",  # example of an order constraint
+        "1.0*x1 + 0.5*x2 <= 15.0",  # example of a linear constraint. Note the lack of space around the asterisks
+    ],
+    """
+
+
+
+# ------------------------------
+# --- workflow control tools ---
+# ------------------------------
 @mcp.tool("pause-and-resume")
 def pause_and_resume() -> str:
     """toggle pause and resume for workflow execution"""
@@ -161,7 +208,7 @@ def pause_and_resume() -> str:
     return msg
 
 
-@mcp.tool("abort-pending-workflow-iterations")
+@mcp.tool("abort-pending-workflow")
 def abort_pending_workflow_iterations() -> str:
     """abort pending workflow execution"""
     if not _check_authentication():
@@ -179,40 +226,75 @@ def stop_workflow() -> str:
     return msg
 
 
-@mcp.tool("repeat-run-workflow")
-def repeat_run_workflow(repeat_time: int = None) -> str:
-    """stop workflow execution after current step"""
+@mcp.tool("run-workflow-repeat")
+def run_workflow(repeat_time: Optional[int] = None) -> str:
+    """
+    run the loaded workflow with repeat times
+    :param repeat_time:
+    :return:
+    """
     if not _check_authentication():
         return f"Having issues logging in to ivoryOS, or ivoryOS server is not running."
-    client.post(f"{url}/experiment", data={"repeat": str(repeat_time)})
-    return "workflow execution started."
-
-
-@mcp.tool("run-workflow-with-parameters")
-def run_workflow_with_kwargs(kwargs_list: list[dict] = None) -> str | int:
-    """stop workflow execution after current step"""
-    if not _check_authentication():
-        return f"Having issues logging in to ivoryOS, or ivoryOS server is not running."
-
-    kwargs_to_ivoryos_format = {}
-    for index, kwargs in enumerate(kwargs_list):
-        for key, value in kwargs.items():
-            kwargs_to_ivoryos_format[f"{key}[{index + 1}]"] = value
-    kwargs_to_ivoryos_format["online-config"] = ""
-    response = client.post(f"{url}/experiment", data=kwargs_to_ivoryos_format)
-    return response.status_code
-
-
-
-@mcp.tool("submit_workflow_script")
-def submit_workflow_script(main_script: str = "", cleanup_script: str = "", prep_script: str = "") -> str:
-    """get current workflow script"""
-    if not _check_authentication():
-        return "Having issues logging in to ivoryOS, or ivoryOS server is not running."
-    response = client.post(f"{url}/api/get_script", json={"script": main_script, "cleanup": cleanup_script, "prep": prep_script})
+    response = client.post(f"{url}/experiment", data={"repeat": str(repeat_time)})
     if response.status_code == httpx.codes.OK:
-        return "Updated"
-    return "cannot update workflow script"
+        return response.json()
+    return "cannot get workflow data"
+
+
+@mcp.tool("run-workflow-kwargs")
+def run_workflow_with_kwargs(kwargs_list: list[dict] = None) -> str | int:
+    """
+    run the loaded workflow with a list of key word arguments (kwargs)
+    :param kwargs_list: [{"arg1":1, "arg2":2}, {"arg1":1, "arg2":2}]
+    :return:
+    """
+    if not _check_authentication():
+        return f"Having issues logging in to ivoryOS, or ivoryOS server is not running."
+    response = client.post(f"{url}/experiment", json={"kwargs": kwargs_list})
+    if response.status_code == httpx.codes.OK:
+        return response.json()
+    return "cannot get workflow data"
+
+
+@mcp.tool("run-workflow-campaign")
+def run_workflow_campaign(parameters: list[dict], objectives: list[dict], repeat: int = 25,
+                          parameter_constraints: list[str] = []) -> str:
+    """
+    run the loaded workflow with ax-platform (credit: Honegumi)
+    :param parameters: [
+        {"name": "x1", "type": "range", "value": 10.0},
+        {"name": "x2", "type": "fixed", "bounds": [0.0, 10.0]},
+        {
+            "name": "c1",
+            "type": "choice",
+            "is_ordered": False,
+            "values": ["A", "B", "C"],
+        },
+    ]
+    :param objectives: [
+        {"name": "obj_1", "minimize": True},
+        {"name": "obj_2", "minimize": False},
+    ]
+    :param repeat:
+    :param parameter_constraints: [
+        "x1 + x2 <= 15.0",
+        "x1 + x2 <= {total}",
+        "x1 <= x2",
+        "1.0*x1 + 0.5*x2 <= 15.0",
+    ],
+    :return:
+    """
+    if not _check_authentication():
+        return f"Having issues logging in to ivoryOS, or ivoryOS server is not running."
+    response = client.post(f"{url}/experiment",
+                           json={"parameters":parameters,
+                                 "objectives":objectives,
+                                 "parameter_constraints":parameter_constraints,
+                                 "repeat": repeat,
+                                 })
+    if response.status_code == httpx.codes.OK:
+        return response.json()
+    return "cannot get workflow data"
 
 
 @mcp.tool("list-workflow-data")
@@ -234,7 +316,7 @@ def list_workflow_data(workflow_name: str = "") -> str:
 def load_workflow_data(workflow_id: int) -> str:
     """
     list workflow data
-    :param workflow_name: load data that was acquired using `workflow name`
+    :param workflow_id: load data that was acquired using `workflow name`
     :return: {'workflow_data': {'1': {'start_time': 'Mon, 09 Jun 2025 16:01:03 GMT', 'workflow_name': 'test1'}}}
     """
     if not _check_authentication():

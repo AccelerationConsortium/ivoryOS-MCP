@@ -36,19 +36,21 @@ mcp install ivoryos_mcp/server.py
 ```
 
 ## ✨ Features
-| **Category**         | **Feature**                         | **Description**                                      | **Status** |
-|----------------------|-------------------------------------|------------------------------------------------------|------------|
-| **General Tools**    | `platform-info`                     | Get signature of the current platform                | ✅          |
-|                      | `execution-status`                  | Check if system is busy and current/last task status | ✅          |
-| **Direct Control**   | `execute-task`                      | Call backend function directly                       | ✅          |
-| **Workflow Design**  | `list-workflow-scripts`             | List all workflow scripts from the database          | ✅          |
-|                      | `load-workflow-script`              | Load a workflow script from the database             | ✅          |
-|                      | `submit-workflow-script`            | Save a workflow Python script to the database        | ✅          |
-|                      | `create-execution-plan`             | Build an execution plan from prompt/visual/script    | ✅          |
-| **Workflow Control** | `pause-and-resume`                  | Pause or resume the workflow execution               | ✅          |
-|                      | `abort-pending-workflow-iterations` | Finish current iteration, abort future executions    | ✅          |
-|                      | `stop-current-workflow`             | Safe stop of current workflow                        | ✅          |
-| **Workflow Data**    | `list-workflow-data`                | List available workflow execution data               | ✅          |
-|                      | `load-workflow-data`                | Load CSV and execution log from selected workflow    | ✅          |
+| **Category**         | **Feature**              | **Description**                                        | **Status** |
+|----------------------|--------------------------|--------------------------------------------------------|------------|
+| **General Tools**    | `platform-info`          | Get signature of the current platform                  | ✅          |
+|                      | `execution-status`       | Check if system is busy and current/last task status   | ✅          |
+| **Direct Control**   | `execute-task`           | Call backend function directly                         | ✅          |
+| **Workflow Design**  | `list-workflow-scripts`  | List all workflow scripts from the database            | ✅          |
+|                      | `load-workflow-script`   | Load a workflow script from the database               | ✅          |
+|                      | `submit-workflow-script` | Save a workflow Python script to the database          | ✅          |
+| **Workflow Run**     | `run-workflow-repeat`    | Run workflow scripts repeatedly with static parameters | ✅          |
+|                      | `run-workflow-kwargs`    | Run workflow scripts with dynamic parameters           | ✅          |
+|                      | `run-workflow-campaign`  | Run workflow campaign with an optimizer                | ✅          |
+| **Workflow Control** | `pause-and-resume`       | Pause or resume the workflow execution                 | ✅          |
+|                      | `abort-pending-workflow` | Finish current iteration, abort future executions      | ✅          |
+|                      | `stop-current-workflow`  | Safe stop of current workflow                          | ✅          |
+| **Workflow Data**    | `list-workflow-data`     | List available workflow execution data                 | ✅          |
+|                      | `load-workflow-data`     | Load CSV and execution log from selected workflow      | ✅          |
 
 ## 🧪 Examples
