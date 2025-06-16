@@ -7,3 +7,14 @@ requires-python = ">=3.10"
 dependencies = [
     "mcp[cli]>=1.9.2",
 ]
+
+[project.scripts]
+ivoryos-mcp = "ivoryos_mcp.server:main"
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+
+[project.urls]
+"Homepage" = "https://gitlab.com/heingroup/ivoryos-suite/ivoryos-mcp"
