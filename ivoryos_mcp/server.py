@@ -4,15 +4,15 @@ from typing import Optional
 
 from mcp.server.fastmcp import FastMCP
 import httpx
-
+from dotenv import load_dotenv
 # Create an MCP server
 mcp = FastMCP("IvoryOS MCP")
 
-
+load_dotenv()
 url = os.getenv("IVORYOS_URL", "http://127.0.0.1:8000/ivoryos")
 login_data = {
-    "username": os.getenv("USERNAME", "admin"),
-    "password": os.getenv("PASSWORD", "admin"),
+    "username": os.getenv("IVORYOS_USERNAME", "admin"),
+    "password": os.getenv("IVORYOS_PASSWORD", "admin"),
 }
 ivoryos_client = httpx.Client(follow_redirects=True)
 

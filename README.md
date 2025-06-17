@@ -5,6 +5,28 @@
 
 Serve as a robot control interface using [IvoryOS](https://gitlab.com/heingroup/ivoryos) and Model Context Protocol (MCP) to design, manage workflows, and interact with the current hardware/software execution layer.
 
+## 🚀 Quickstart with [Claude Desktop](https://claude.ai/download)
+Install [uv](https://docs.astral.sh/uv/).
+Open up the configuration file, and add IvoryOS MCP config.
+* macOS: ~/Library/Application Support/Claude/claude_desktop_config.json
+* Windows: %APPDATA%\Claude\claude_desktop_config.json
+```json
+{
+  "mcpServers": {
+    "IvoryOS MCP": {
+      "command": "uvx",
+      "args": [
+        "ivoryos-mcp"
+      ],
+      "env": {
+        "IVORYOS_URL": "http://127.0.0.1:8000/ivoryos",
+        "IVORYOS_USERNAME": "<IVORYOS_USERNAME>",
+        "IVORYOS_PASSWORD": "<IVORYOS_PASSWORD>"
+      }
+    }
+  }
+}
+```
 
 ## 📦 Installation
 Install [uv](https://docs.astral.sh/uv/).
