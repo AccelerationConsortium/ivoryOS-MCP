@@ -3,21 +3,33 @@ stages:
   - build
   - upload
 
+variables:
+  PACKAGE_DIR: dist
+
 check_version_change:
   stage: check
   image: python:3.10
   script:
     - apt-get update && apt-get install -y git
     - git fetch origin main
-    - 'export OLD_VERSION=$(git show origin/main:pyproject.toml | grep "^version" | cut -d "\"" -f2)'
-    - 'export NEW_VERSION=$(grep "^version" pyproject.toml | cut -d "\"" -f2)'
-    # - echo "Old: $OLD_VERSION | New: $NEW_VERSION"
-    - >
+    - OLD_VERSION=$(git show origin/main:pyproject.toml | grep '^version' | cut -d '"' -f2)
+    - NEW_VERSION=$(grep '^version' pyproject.toml | cut -d '"' -f2)
+    - 'echo Old version: $OLD_VERSION'
+    - 'echo New version: $NEW_VERSION'
+    - |
+      echo "Old version: $OLD_VERSION"
+      echo "New version: $NEW_VERSION"
       if [ "$OLD_VERSION" = "$NEW_VERSION" ]; then
-        echo "Version did not change, skipping upload.";
-        exit 1;
+        echo "VERSION_CHANGED=false" > version.env
+      else
+        echo "VERSION_CHANGED=true" > version.env
       fi
-  allow_failure: true
+  artifacts:
+    reports:
+      dotenv: version.env
+  rules:
+    - changes:
+        - pyproject.toml
 
 build_package:
   stage: build
@@ -28,7 +40,8 @@ build_package:
   artifacts:
     paths:
       - dist/
-      
+  rules:
+    - if: '$VERSION_CHANGED == "true"'
 
 upload_to_pypi:
   stage: upload
@@ -36,5 +49,6 @@ upload_to_pypi:
   script:
     - pip install twine
     - twine upload dist/*
-  only:
-    - main
+  rules:
+    - if: '$VERSION_CHANGED == "true"'
+ 
