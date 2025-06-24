@@ -3,44 +3,32 @@ stages:
   - build
   - upload
 
-variables:
-  PACKAGE_DIR: dist
-
 check_version_change:
   stage: check
   image: python:3.10
   script:
     - apt-get update && apt-get install -y git
     - git fetch origin main
-    - export OLD_VERSION=$(git show origin/main:pyproject.toml | grep '^version' | cut -d '"' -f2)
-    - export NEW_VERSION=$(grep '^version' pyproject.toml | cut -d '"' -f2)
-    - echo "Old: $OLD_VERSION | New: $NEW_VERSION"
-    - if [ "$OLD_VERSION" = "$NEW_VERSION" ]; then
+    - 'export OLD_VERSION=$(git show origin/main:pyproject.toml | grep "^version" | cut -d "\"" -f2)'
+    - 'export NEW_VERSION=$(grep "^version" pyproject.toml | cut -d "\"" -f2)'
+    # - echo "Old: $OLD_VERSION | New: $NEW_VERSION"
+    - >
+      if [ "$OLD_VERSION" = "$NEW_VERSION" ]; then
         echo "Version did not change, skipping upload.";
         exit 1;
       fi
   allow_failure: true
-  artifacts:
-    reports:
-      dotenv: version.env
-  rules:
-    - changes:
-        - pyproject.toml
 
 build_package:
   stage: build
   image: python:3.10
-  dependencies: []
   script:
     - pip install build
     - python -m build
   artifacts:
     paths:
       - dist/
-  rules:
-    - if: '$CI_JOB_STATUS == "success"'
-      exists:
-        - pyproject.toml
+      
 
 upload_to_pypi:
   stage: upload
@@ -50,9 +38,3 @@ upload_to_pypi:
     - twine upload dist/*
   only:
     - main
-  rules:
-    - if: '$CI_JOB_STATUS == "success"'
-      exists:
-        - pyproject.toml
-  environment:
-    name: production
