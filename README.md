@@ -67,26 +67,28 @@ mcp install ivoryos_mcp/server.py
 ```
 
 ## ✨ Features
-| **Category**            | **Feature**              | **Route**                                             | **Description**                                        |
-|-------------------------|--------------------------|-------------------------------------------------------|--------------------------------------------------------|
-| **ℹ️ General Tools**    | `platform-info`          | `GET /backend_control`                                | Get ivoryOS info and signature of the platform         |
-|                         | `execution-status`       | `GET /api/status`                                     | Check if system is busy and current/last task status   |
-| **ℹ️ Workflow Design**  | `list-workflow-scripts`  | `GET /database/<deck_name>`                           | List all workflow scripts from the database            |
-|                         | `load-workflow-script`   | `GET /edit_workflow/<name>`<br/>`GET /api/get_script` | Load a workflow script from the database               |
-|                         | `submit-workflow-script` | `POST /api/get_script`                                | Save a workflow Python script to the database          |
-| **ℹ️ Workflow Data**    | `list-workflow-data`     | `GET /workflow_runs`                                  | List available workflow execution data                 |
-|                         | `load-workflow-data`     | `GET /workflow_steps`                                 | Load CSV and execution log from selected workflow      |
-| **🤖 Direct Control**   | `execute-task`           | `POST /backend_control`                               | Call platform function directly                        |
-| **🤖 Workflow Run**     | `run-workflow-repeat`    | `POST /experiment`                                    | Run workflow scripts repeatedly with static parameters |
-|                         | `run-workflow-kwargs`    | `POST /experiment`                                    | Run workflow scripts with dynamic parameters           |
-|                         | `run-workflow-campaign`  | `POST /experiment`                                    | Run workflow campaign with an optimizer                |
-| **🤖 Workflow Control** | `pause-and-resume`       | `GET /api/pause`                                      | Pause or resume the workflow execution                 |
-|                         | `abort-pending-workflow` | `GET /api/abort_pending`                              | Finish current iteration, abort future executions      |
-|                         | `stop-current-workflow`  | `GET /api/abort_current`                              | Safe stop of current workflow                          |
+| **Category**            | **Feature**              | **Route**                                  | **Description**                                        |
+|-------------------------|--------------------------|--------------------------------------------|--------------------------------------------------------|
+| **ℹ️ General Tools**    | `platform-info`          | `GET /api/control`                         | Get ivoryOS info and signature of the platform         |
+|                         | `execution-status`       | `GET /api/runner/status`                   | Check if system is busy and current/last task status   |
+| **ℹ️ Workflow Design**  | `list-workflow-scripts`  | `GET /database/scripts/<deck_name>`        | List all workflow scripts from the database            |
+|                         | `load-workflow-script`   | `GET /database/scripts/edit/<script_name>` | Load a workflow script from the database               |
+|                         | `submit-workflow-script` | `POST /api/design/submit`                  | Save a workflow Python script to the database          |
+| **ℹ️ Workflow Data**    | `list-workflow-data`     | `GET /database/workflows/`                 | List available workflow execution data                 |
+|                         | `load-workflow-data`     | `GET /database/workflows/<workflow_id>`    | Load execution log and data file                       |
+| **🤖 Direct Control**   | `execute-task`           | `POST /api/control`                        | Call platform function directly                        |
+| **🤖 Workflow Run**     | `run-workflow-repeat`    | `POST /design/campaign`                    | Run workflow scripts repeatedly with static parameters |
+|                         | `run-workflow-kwargs`    | `POST /design/campaign`                    | Run workflow scripts with dynamic parameters           |
+|                         | `run-workflow-campaign`  | `POST /design/campaign`                    | Run workflow campaign with an optimizer                |
+| **🤖 Workflow Control** | `pause-and-resume`       | `GET /api/runner/pause`                    | Pause or resume the workflow execution                 |
+|                         | `abort-pending-workflow` | `GET /api/runner/abort_pending`            | Finish current iteration, abort future executions      |
+|                         | `stop-current-workflow`  | `GET /api/runner/abort_current`            | Safe stop of current workflow                          |
 
-> ⚠️ It's recommended to only use **`allow always`** for tasks with ℹ️ 
-> and use **`allow once`** for tasks with 🤖. 
+> ⚠️ ℹ️ are resources, but decorated as tool due to the current issue with MCP Python SDK and Claude Desktop integration.  
+> It's recommended to only use **`allow always`** for ℹ️ tasks  
+> and use **`allow once`** for 🤖 tasks. 
 > These tasks will trigger actual actions on your hosted Python code.
+
 
 
 ## 🧪 Examples

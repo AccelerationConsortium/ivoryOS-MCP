@@ -25,7 +25,7 @@ def _check_authentication():
         resp = ivoryos_client.get(f"{url}/", follow_redirects=False)
         if resp.status_code == httpx.codes.OK:
             return
-        login_resp = ivoryos_client.post(f"{url}/login", data=login_data)
+        login_resp = ivoryos_client.post(f"{url}/auth/login", data=login_data)
         if login_resp.status_code != 200:
             raise RuntimeError(f"Login failed")
     except httpx.ConnectError as e:
@@ -38,7 +38,7 @@ def summarize_deck_function() -> str:
     summarize ivoryOS and the current deck functions, no authentication required.
     """
     try:
-        snapshot = ivoryos_client.get(f"{url}/backend_control").json()
+        snapshot = ivoryos_client.get(f"{url}/api/control").json()
         return (
             """
             IvoryOS is a unified task and workflow orchestrator.
@@ -79,7 +79,7 @@ def execution_status():
     """
     try:
         _check_authentication()
-        resp = ivoryos_client.get(f"{url}/api/status")
+        resp = ivoryos_client.get(f"{url}/api/runner/status")
         if resp.status_code == httpx.codes.OK:
             return resp.json()
         else:
@@ -103,7 +103,7 @@ def execute_task(component: str, method: str, kwargs: dict = None) -> str:
         if kwargs is None:
             kwargs = {}
 
-        snapshot = ivoryos_client.get(f"{url}/backend_control").json()
+        snapshot = ivoryos_client.get(f"{url}/api/control").json()
         component = component if component.startswith("deck.") else f"deck.{component}"
 
         if component not in snapshot:
@@ -113,7 +113,7 @@ def execute_task(component: str, method: str, kwargs: dict = None) -> str:
 
         # only submit the task without waiting for completion.
         kwargs["hidden_wait"] = False
-        resp = ivoryos_client.post(f"{url}/backend_control/{component}", data=kwargs)
+        resp = ivoryos_client.post(f"{url}/api/control/{component}", data=kwargs)
         if resp.status_code == httpx.codes.OK:
             result = resp.json()
             return f"{result}. Use `execution-status` to monitor."
@@ -132,7 +132,7 @@ def list_workflow_script(search_key:str='', deck_name:str='') -> str:
     """
     try:
         _check_authentication()
-        resp = ivoryos_client.get(f"{url}/database/{deck_name}", params={"keyword": search_key})
+        resp = ivoryos_client.get(f"{url}/database/scripts/{deck_name}", params={"keyword": search_key})
         if resp.status_code == httpx.codes.OK:
             return resp.json()
         else:
@@ -150,9 +150,9 @@ def load_workflow_script(workflow_name: str) -> str:
     """
     try:
         _check_authentication()
-        resp = ivoryos_client.get(f"{url}/edit_workflow/{workflow_name}")
+        resp = ivoryos_client.get(f"{url}/database/scripts/edit/{workflow_name}")
         if resp.status_code == httpx.codes.OK:
-            script = ivoryos_client.get(f"{url}/api/get_script").json()
+            script = resp.json()
             return script
         else:
             return f"Error loading workflow script: {resp.status_code}"
@@ -165,7 +165,7 @@ def submit_workflow_script(workflow_name: str, main_script: str = "", cleanup_sc
     """get current workflow script"""
     try:
         _check_authentication()
-        resp = ivoryos_client.post(url=f"{url}/api/get_script",
+        resp = ivoryos_client.post(url=f"{url}/api/design/submit",
                                    json={
                                "workflow_name":workflow_name,
                                "script": main_script,
@@ -184,7 +184,7 @@ def submit_workflow_script(workflow_name: str, main_script: str = "", cleanup_sc
 def generate_custom_script() -> str:
     """prompt for writing workflow script. no authentication required"""
     try:
-        snapshot = httpx.get(f"{url}/backend_control").json()
+        snapshot = httpx.get(f"{url}/api/control").json()
         return f"""
                 These are my functions signatures,
                 {snapshot}
@@ -249,7 +249,7 @@ def pause_and_resume() -> str:
     """toggle pause and resume for workflow execution"""
     try:
         _check_authentication()
-        resp = ivoryos_client.post(f"{url}/api/pause")
+        resp = ivoryos_client.post(f"{url}/api/runner/pause")
         if resp.status_code == httpx.codes.OK:
             return resp.json()
         else:
@@ -263,7 +263,7 @@ def abort_pending_workflow_iterations() -> str:
     """abort pending workflow execution"""
     try:
         _check_authentication()
-        resp = ivoryos_client.post(f"{url}/api/abort_pending")
+        resp = ivoryos_client.post(f"{url}/api/runner/abort_pending")
         if resp.status_code == httpx.codes.OK:
             return resp.json()
         else:
@@ -277,7 +277,7 @@ def stop_workflow() -> str:
     """stop workflow execution after current step"""
     try:
         _check_authentication()
-        resp = ivoryos_client.post(f"{url}/api/abort_current")
+        resp = ivoryos_client.post(f"{url}/api/runner/abort_current")
         if resp.status_code == httpx.codes.OK:
             return resp.json()
         else:
@@ -295,7 +295,7 @@ def run_workflow(repeat_time: Optional[int] = None) -> str:
     """
     try:
         _check_authentication()
-        resp = ivoryos_client.post(f"{url}/experiment", data={"repeat": str(repeat_time)})
+        resp = ivoryos_client.post(f"{url}/design/campaign", json={"repeat": str(repeat_time)})
         if resp.status_code == httpx.codes.OK:
             return resp.json()
         else:
@@ -313,7 +313,7 @@ def run_workflow_with_kwargs(kwargs_list: list[dict] = None) -> str | int:
     """
     try:
         _check_authentication()
-        resp = ivoryos_client.post(f"{url}/experiment", json={"kwargs": kwargs_list})
+        resp = ivoryos_client.post(f"{url}/design/campaign", json={"kwargs": kwargs_list})
         if resp.status_code == httpx.codes.OK:
             return resp.json()
         else:
@@ -352,7 +352,7 @@ def run_workflow_campaign(parameters: list[dict], objectives: list[dict], repeat
     """
     try:
         _check_authentication()
-        resp = ivoryos_client.post(f"{url}/experiment",
+        resp = ivoryos_client.post(f"{url}/design/campaign",
                                    json={"parameters":parameters,
                                      "objectives":objectives,
                                      "parameter_constraints":parameter_constraints,
@@ -375,7 +375,7 @@ def list_workflow_data(workflow_name: str = "") -> str:
     """
     try:
         _check_authentication()
-        resp = ivoryos_client.get(f"{url}/workflow_runs", params={"keyword": workflow_name})
+        resp = ivoryos_client.get(f"{url}/database/workflows/", params={"keyword": workflow_name})
         if resp.status_code == httpx.codes.OK:
             return resp.json()
         else:
@@ -393,7 +393,7 @@ def load_workflow_data(workflow_id: int) -> str:
     """
     try:
         _check_authentication()
-        resp = ivoryos_client.get(f"{url}/workflow_steps/{workflow_id}")
+        resp = ivoryos_client.get(f"{url}/database/workflows/{workflow_id}")
         if resp.status_code == httpx.codes.OK:
             return resp.json()
         else:
