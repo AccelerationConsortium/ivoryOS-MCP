@@ -183,33 +183,29 @@ def submit_workflow_script(workflow_name: str, main_script: str = "", cleanup_sc
 @mcp.prompt("generate-workflow-script")
 def generate_custom_script() -> str:
     """prompt for writing workflow script. no authentication required"""
-    try:
-        snapshot = httpx.get(f"{url}/api/control").json()
-        return f"""
-                These are my functions signatures,
-                {snapshot}
-                and I want you to find the most appropriate function based on the task description
-                ,and write them into a Python function without need to import the deck. And write return values
-                as dict
-                ```
-                def workflow_static():
-	                if True:
-		                results = deck.sdl.analyze(**{'param_1': 1, 'param_2': 2})
-	                time.sleep(1.0)
-	                return {'results':results,}
-	            ```
-	            or
-	            ```
-	            def workflow_dynamic(param_1, param_2):
-	                if True:
-		                results = deck.sdl.analyze(**{'param_1': param_1, 'param_1': param_2})
-	                time.sleep(1.0)
-	                return {'results':results,}
-                ```
-                Please only use these available action names from above 
-                """
-    except Exception:
-        return "there is not deck available."
+
+    return """
+            find the most appropriate function based on the task description
+            ,and write them into a Python function without need to import the deck. 
+            And write only needed return values as dict
+            ```
+            def workflow_static():
+	            if True:
+	                results = deck.sdl.analyze(**{'param_1': 1, 'param_2': 2})
+	            time.sleep(1.0)
+	            return {'results':results,}
+	        ```
+	        or
+	        ```
+	        def workflow_dynamic(param_1, param_2):
+	            if True:
+	                results = deck.sdl.analyze(**{'param_1': param_1, 'param_1': param_2})
+	            time.sleep(1.0)
+	            return {'results':results,}
+            ```
+            Please only use these available action names.
+            """
+
 
 
 @mcp.prompt("campaign-design")
