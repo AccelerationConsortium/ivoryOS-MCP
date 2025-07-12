@@ -46,6 +46,9 @@ build_package:
 upload_to_pypi:
   stage: upload
   image: python:3.10
+  variables:
+    TWINE_USERNAME: $PYPI_USERNAME_IVORY
+    TWINE_PASSWORD: $PYPI_PASSWORD_IVORY
   script:
     - pip install twine
     - twine upload dist/*

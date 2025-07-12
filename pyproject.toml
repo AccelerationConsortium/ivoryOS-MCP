@@ -1,12 +1,13 @@
 [project]
 name = "ivoryos-mcp"
-version = "0.1.4"
+version = "0.1.5"
 description = "MCP server for ivoryOS. "
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "mcp[cli]>=1.9.2",
-    "python-dotenv"
+    "ivoryos-client",
+    "python-dotenv",
 ]
 
 [project.scripts]
