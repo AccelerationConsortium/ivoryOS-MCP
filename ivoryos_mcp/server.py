@@ -42,7 +42,7 @@ def execution_status():
 
 
 @mcp.tool("execute-task")
-def execute_task(component: str, method: str, kwargs: dict = None) -> str:
+def execute_task(component: str, method: str, kwargs: dict = None):
     """Execute a robot task and return task_id."""
     try:
         result = ivoryos_client.execute_task(component, method, kwargs)
@@ -52,7 +52,7 @@ def execute_task(component: str, method: str, kwargs: dict = None) -> str:
 
 
 @mcp.tool("list-workflow-scripts")
-def list_workflow_script(search_key: str = '', deck_name: str = '') -> str:
+def list_workflow_script(search_key: str = '', deck_name: str = ''):
     """List workflow scripts"""
     try:
         return ivoryos_client.list_workflow_scripts(search_key, deck_name)
@@ -61,7 +61,7 @@ def list_workflow_script(search_key: str = '', deck_name: str = '') -> str:
 
 
 @mcp.tool("load-workflow-script")
-def load_workflow_script(workflow_name: str) -> str:
+def load_workflow_script(workflow_name: str):
     """Load a workflow script"""
     try:
         return ivoryos_client.load_workflow_script(workflow_name)
@@ -71,7 +71,7 @@ def load_workflow_script(workflow_name: str) -> str:
 
 @mcp.tool("submit-workflow-script")
 def submit_workflow_script(workflow_name: str, main_script: str = "",
-                           cleanup_script: str = "", prep_script: str = "") -> str:
+                           cleanup_script: str = "", prep_script: str = ""):
     """Submit a workflow script"""
     try:
         return ivoryos_client.submit_workflow_script(workflow_name, main_script, cleanup_script, prep_script)
@@ -80,7 +80,7 @@ def submit_workflow_script(workflow_name: str, main_script: str = "",
 
 
 @mcp.tool("pause-and-resume")
-def pause_and_resume() -> str:
+def pause_and_resume():
     """Toggle pause and resume for workflow execution"""
     try:
         return ivoryos_client.pause_and_resume()
@@ -89,7 +89,7 @@ def pause_and_resume() -> str:
 
 
 @mcp.tool("abort-pending-workflow")
-def abort_pending_workflow_iterations() -> str:
+def abort_pending_workflow_iterations():
     """Abort pending workflow execution"""
     try:
         return ivoryos_client.abort_pending_workflow()
@@ -98,7 +98,7 @@ def abort_pending_workflow_iterations() -> str:
 
 
 @mcp.tool("stop-current-workflow")
-def stop_workflow() -> str:
+def stop_workflow():
     """Stop workflow execution after current step"""
     try:
         return ivoryos_client.stop_current_workflow()
@@ -107,7 +107,7 @@ def stop_workflow() -> str:
 
 
 @mcp.tool("run-workflow-repeat")
-def run_workflow(repeat_time: Optional[int] = None) -> str:
+def run_workflow(repeat_time: Optional[int] = None):
     """Run the loaded workflow with repeat times"""
     try:
         return ivoryos_client.run_workflow_repeat(repeat_time)
@@ -116,7 +116,7 @@ def run_workflow(repeat_time: Optional[int] = None) -> str:
 
 
 @mcp.tool("run-workflow-kwargs")
-def run_workflow_with_kwargs(kwargs_list: list[dict] = None) -> str:
+def run_workflow_with_kwargs(kwargs_list: list[dict] = None):
     """Run the loaded workflow with a list of keyword arguments"""
     try:
         return ivoryos_client.run_workflow_kwargs(kwargs_list)
@@ -126,7 +126,7 @@ def run_workflow_with_kwargs(kwargs_list: list[dict] = None) -> str:
 
 @mcp.tool("run-workflow-campaign")
 def run_workflow_campaign(parameters: list[dict], objectives: list[dict],
-                          repeat: int = 25, parameter_constraints: list[str] = []) -> str:
+                          repeat: int = 25, parameter_constraints: list[str] = []):
     """Run the loaded workflow with ax-platform (credit: Honegumi)"""
     try:
         return ivoryos_client.run_workflow_campaign(parameters, objectives, repeat, parameter_constraints)
@@ -135,7 +135,7 @@ def run_workflow_campaign(parameters: list[dict], objectives: list[dict],
 
 
 @mcp.tool("list-workflow-data")
-def list_workflow_data(workflow_name: str = "") -> str:
+def list_workflow_data(workflow_name: str = ""):
     """List workflow data"""
     try:
         return ivoryos_client.list_workflow_data(workflow_name)
@@ -144,7 +144,7 @@ def list_workflow_data(workflow_name: str = "") -> str:
 
 
 @mcp.tool("load-workflow-data")
-def load_workflow_data(workflow_id: int) -> str:
+def load_workflow_data(workflow_id: int):
     """Load workflow data"""
     try:
         return ivoryos_client.load_workflow_data(workflow_id)
