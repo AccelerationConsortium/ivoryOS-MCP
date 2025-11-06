@@ -104,59 +104,59 @@ When using IDE (e.g. PyCharm), the ``uv`` environment might be configured, you c
      - **Description**
    * - **ℹ️ General Tools**
      - ``platform-info``
-     - ``GET /api/control``
+     - ``GET /instruments``
      - Get ivoryOS info and signature of the platform
    * -
      - ``execution-status``
-     - ``GET /api/runner/status``
+     - ``GET /executions/status``
      - Check if system is busy and current/last task status
    * - **ℹ️ Workflow Design**
      - ``list-workflow-scripts``
-     - ``GET /database/scripts/<deck_name>``
+     - ``GET /library/<deck_name>``
      - List all workflow scripts from the database
    * -
      - ``load-workflow-script``
-     - ``GET /database/scripts/edit/<script_name>``
+     - ``GET /library/<workflow_name>``
      - Load a workflow script from the database
    * -
      - ``submit-workflow-script``
-     - ``POST /api/design/submit``
+     - ``POST /draft/submit_python``
      - Save a workflow Python script to the database
    * - **ℹ️ Workflow Data**
      - ``list-workflow-data``
-     - ``GET /database/workflows/``
+     - ``GET /executions/records``
      - List available workflow execution data
    * -
      - ``load-workflow-data``
-     - ``GET /database/workflows/<workflow_id>``
+     - ``GET /executions/records/<workflow_id>``
      - Load execution log and data file
    * - **🤖 Direct Control**
      - ``execute-task``
-     - ``POST /api/control``
+     - ``POST /instruments/<component>``
      - Call platform function directly
    * - **🤖 Workflow Run**
      - ``run-workflow-repeat``
-     - ``POST /design/campaign``
+     - ``POST /executions/config``
      - Run workflow scripts repeatedly with static parameters
    * -
      - ``run-workflow-kwargs``
-     - ``POST /design/campaign``
+     - ``POST /executions/config``
      - Run workflow scripts with dynamic parameters
    * -
      - ``run-workflow-campaign``
-     - ``POST /design/campaign``
+     - ``POST /executions/campaign``
      - Run workflow campaign with an optimizer
    * - **🤖 Workflow Control**
      - ``pause-and-resume``
-     - ``GET /api/runner/pause``
+     - ``GET /executions/pause-resume``
      - Pause or resume the workflow execution
    * -
      - ``abort-pending-workflow``
-     - ``GET /api/runner/abort_pending``
+     - ``GET /executions/abort/next-iteration``
      - Finish current iteration, abort future executions
    * -
      - ``stop-current-workflow``
-     - ``GET /api/runner/abort_current``
+     - ``GET /executions/abort/next-task``
      - Safe stop of current workflow
 
 .. warning::

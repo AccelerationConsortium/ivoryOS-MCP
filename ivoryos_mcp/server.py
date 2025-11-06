@@ -125,11 +125,26 @@ def run_workflow_with_kwargs(kwargs_list: list[dict] = None):
 
 
 @mcp.tool("run-workflow-campaign")
-def run_workflow_campaign(parameters: list[dict], objectives: list[dict],
-                          repeat: int = 25, parameter_constraints: list[str] = []):
+def run_workflow_campaign(optimizer_type: str,
+                          parameters: list[dict] = None,
+                          objectives: list[dict] = None,
+                          repeat: int = 25,
+                          batch_size: int = 1,
+                          steps={},
+                          parameter_constraints: Optional[list[str]] = None,
+                          existing_data:Optional[str] = None):
     """Run the loaded workflow with ax-platform (credit: Honegumi)"""
     try:
-        return ivoryos_client.run_workflow_campaign(parameters, objectives, repeat, parameter_constraints)
+        return ivoryos_client.run_workflow_campaign(
+            optimizer_type=optimizer_type,
+            parameters=parameters,
+            objectives=objectives,
+            repeat=repeat,
+            batch_size=batch_size,
+            steps=steps,
+            parameter_constraints=parameter_constraints,
+            existing_data=existing_data
+        )
     except Exception as e:
         return f"Error starting workflow execution: {str(e)}"
 
