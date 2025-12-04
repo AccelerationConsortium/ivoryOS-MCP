@@ -124,16 +124,47 @@ def run_workflow_with_kwargs(kwargs_list: list[dict] = None):
         return f"Error starting workflow execution: {str(e)}"
 
 
+@mcp.tool("get-optimizer-schema")
+def get_optimizer_schema(optimizer_type: Optional[str] = None):
+    """
+    Get optimizer schema with an optimizer type in ["baybe", "ax", "nimo"]
+    Get all optimizer schemas if optimizer_type is None
+    """
+    try:
+        return ivoryos_client.get_optimizer_schema(optimizer_type)
+    except Exception as e:
+        return f"Error getting optimizer schema: {str(e)}"
+
+
 @mcp.tool("run-workflow-campaign")
 def run_workflow_campaign(optimizer_type: str,
                           parameters: list[dict] = None,
                           objectives: list[dict] = None,
                           repeat: int = 25,
                           batch_size: int = 1,
-                          steps={},
+                          steps=None,
                           parameter_constraints: Optional[list[str]] = None,
                           existing_data:Optional[str] = None):
-    """Run the loaded workflow with ax-platform (credit: Honegumi)"""
+    """Run the loaded workflow with optimizers
+
+    :param optimizer_type: Optimizer type in ["baybe", "ax", "nimo"]
+    :param parameters: List of parameter definitions    [
+        {"name": "x1", "type": "range", "value": 10.0},
+        {"name": "x2", "type": "fixed", "bounds": [0.0, 10.0]},
+        {"name": "c1", "type": "choice", "values": ["A", "B", "C"]},
+    ]
+    :param objectives: List of objective definitions    [
+        {"name": "obj_1", "minimize": True},
+        {"name": "obj_2", "minimize": False},
+    ]
+    :param repeat: Number of iterations
+    :param batch_size: Batch size
+    :param steps: Steps for each iteration {"step_1": {"model": "Sobol", "num_samples": 5}, "step_2": {"model": "BoTorch"}}
+    :param parameter_constraints: List of parameter constraints ["x1 + x2 <= 15.0"]
+    :param existing_data: Existing data filename, use `load-workflow-data` to get the filename from workflow id
+    """
+    if steps is None:
+        steps = {"step_1": {"model": "Sobol", "num_samples": 5}, "step_2": {"model": "BoTorch"}}
     try:
         return ivoryos_client.run_workflow_campaign(
             optimizer_type=optimizer_type,
@@ -202,12 +233,7 @@ def ax_campaign_design() -> str:
     parameters=[
         {"name": "x1", "type": "range", "value": 10.0},
         {"name": "x2", "type": "fixed", "bounds": [0.0, 10.0]},
-        {
-            "name": "c1",
-            "type": "choice",
-            "is_ordered": False,
-            "values": ["A", "B", "C"],
-        },
+        {"name": "c1", "type": "choice", "values": ["A", "B", "C"]},
     ]
     objectives=[
         {"name": "obj_1", "minimize": True},
@@ -218,7 +244,8 @@ def ax_campaign_design() -> str:
         "x1 + x2 <= {total}",  # reparameterized compositional constraint, which is a type of sum constraint
         "x1 <= x2",  # example of an order constraint
         "1.0*x1 + 0.5*x2 <= 15.0",  # example of a linear constraint. Note the lack of space around the asterisks
-    ],
+    ]
+    
     """
 
 

@@ -122,6 +122,10 @@ When using IDE (e.g. PyCharm), the ``uv`` environment might be configured, you c
      - ``submit-workflow-script``
      - ``POST /draft/submit_python``
      - Save a workflow Python script to the database
+   * -
+     - ``get-optmizer-schema``
+     - ``POST /executions/optimizer_schema``
+     - Get all optimizers schema
    * - **ℹ️ Workflow Data**
      - ``list-workflow-data``
      - ``GET /executions/records``
