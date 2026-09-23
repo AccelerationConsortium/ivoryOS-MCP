@@ -5,7 +5,20 @@
 
 Serve as a robot control interface using [IvoryOS](https://gitlab.com/heingroup/ivoryos) and Model Context Protocol (MCP) to design, manage workflows, and interact with the current hardware/software execution layer.
 
-## 🚀 Quickstart with [Claude Desktop](https://claude.ai/download)
+## 🧩 One-click install in [Claude Desktop](https://claude.ai/download) (desktop extension)
+1. Download `ivoryos-mcp-<version>.mcpb`.
+2. Double-click it (or drag it into Claude Desktop, or Settings → Extensions → Advanced settings → Install Extension…).
+3. Fill in your ivoryOS URL, username and password, then enable the extension.
+
+Claude Desktop sets up Python and the dependencies itself; nothing else to install. The extension runs on your computer, so it only needs to reach ivoryOS on your network.
+
+To build the `.mcpb` (from this repo, needs Node.js):
+```bash
+npx @anthropic-ai/mcpb pack . ivoryos-mcp-<version>.mcpb
+```
+Keep `version` in `manifest.json` in sync with `pyproject.toml`. `.mcpbignore` keeps `.env` and build files out of the bundle.
+
+## 🚀 Quickstart with [Claude Desktop](https://claude.ai/download) (manual config)
 Install [uv](https://docs.astral.sh/uv/).
 Open up the configuration file, and add IvoryOS MCP config.
 * macOS: ~/Library/Application Support/Claude/claude_desktop_config.json
