@@ -2,7 +2,7 @@
 import os
 from typing import Optional
 
-from mcp.server.fastmcp import FastMCP
+from mcp.server.mcpserver import MCPServer
 import httpx
 from dotenv import load_dotenv
 from ivoryos_client import IvoryosClient
@@ -18,7 +18,7 @@ ivoryos_client = IvoryosClient(
 )
 
 # Create MCP server
-mcp = FastMCP("IvoryOS MCP")
+mcp = MCPServer("IvoryOS MCP")
 
 
 def main():
@@ -43,10 +43,9 @@ def execution_status():
 
 @mcp.tool("execute-task")
 def execute_task(component: str, method: str, kwargs: dict = None):
-    """Execute a robot task and return task_id."""
+    """Execute a robot task, wait for it to finish and return its success and output."""
     try:
-        result = ivoryos_client.execute_task(component, method, kwargs)
-        return f"{result}. Use `execution-status` to monitor."
+        return ivoryos_client.execute_task(component, method, kwargs, wait=True)
     except Exception as e:
         return f"Error executing task: {str(e)}"
 
@@ -107,19 +106,19 @@ def stop_workflow():
 
 
 @mcp.tool("run-workflow-repeat")
-def run_workflow(repeat_time: Optional[int] = None):
+def run_workflow(repeat_time: Optional[int] = None, batch_size: Optional[int] = None):
     """Run the loaded workflow with repeat times"""
     try:
-        return ivoryos_client.run_workflow_repeat(repeat_time)
+        return ivoryos_client.run_workflow_repeat(repeat_time, batch_size)
     except Exception as e:
         return f"Error starting workflow execution: {str(e)}"
 
 
 @mcp.tool("run-workflow-kwargs")
-def run_workflow_with_kwargs(kwargs_list: list[dict] = None):
+def run_workflow_with_kwargs(kwargs_list: list[dict] = None, batch_size: int = 1):
     """Run the loaded workflow with a list of keyword arguments"""
     try:
-        return ivoryos_client.run_workflow_kwargs(kwargs_list)
+        return ivoryos_client.run_workflow_kwargs(kwargs_list, batch_size)
     except Exception as e:
         return f"Error starting workflow execution: {str(e)}"
 
